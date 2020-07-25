@@ -6,7 +6,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
-	"airlines-booking/client/booking"
+	"Airlines-booking-gRPC-Protobuf/client/booking"
 )
 
 func main() {

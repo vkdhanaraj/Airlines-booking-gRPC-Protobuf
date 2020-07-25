@@ -5,7 +5,7 @@ import (
 	"log"
 	"net"
 
-	"airlines-booking/server/booking"
+	"Airlines-booking-gRPC-Protobuf/server/booking"
 
 	"google.golang.org/grpc"
 )

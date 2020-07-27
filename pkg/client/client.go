@@ -6,7 +6,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
-	"Airlines-booking-gRPC-Protobuf/client/booking"
+	pbBooking "Airlines-booking-gRPC-Protobuf/genfiles"
 )
 
 func main() {
@@ -18,9 +18,9 @@ func main() {
 	}
 	defer conn.Close()
 
-	c := booking.NewTicketServiceClient(conn)
+	c := pbBooking.NewTicketServiceClient(conn)
 
-	response, err := c.BookTicket(context.Background(), &booking.Passenger{Name: "Kidiyoor"})
+	response, err := c.BookTicket(context.Background(), &pbBooking.Passenger{Name: "Kidiyoor"})
 	if err != nil {
 		log.Fatalf("Error when calling BookTicket: %s", err)
 	}

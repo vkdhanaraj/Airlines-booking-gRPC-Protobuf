@@ -1,6 +1,7 @@
 syntax = "proto3";
 package booking;
 
+
 message Booking{
     int32 seatNumber = 1;
     string passengerName = 2;

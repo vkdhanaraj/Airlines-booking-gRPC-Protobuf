@@ -5,7 +5,8 @@ import (
 	"log"
 	"net"
 
-	"Airlines-booking-gRPC-Protobuf/server/booking"
+	pbBooking "Airlines-booking-gRPC-Protobuf/genfiles"
+	booking "Airlines-booking-gRPC-Protobuf/pkg/server/booking"
 
 	"google.golang.org/grpc"
 )
@@ -20,7 +21,7 @@ func main() {
 
 	s := booking.Server{}
 	grpcServer := grpc.NewServer()
-	booking.RegisterTicketServiceServer(grpcServer, &s)
+	pbBooking.RegisterTicketServiceServer(grpcServer, &s)
 
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %s", err)

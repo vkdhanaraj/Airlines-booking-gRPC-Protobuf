@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	booking "Airlines-booking-gRPC-Protobuf/genfiles"
 	pb "Airlines-booking-gRPC-Protobuf/genfiles"
 
 	"golang.org/x/net/context"
@@ -23,28 +24,29 @@ func (s *Server) BookTicket(ctx context.Context, passenger *pb.Passenger) (*pb.B
 }
 
 //FlightDetails method
-func (s *Server) FlightDetails(ctx context.Context, company *pb.FlightFilter) (*pb.Flight,error) {
-	if company.AirlineCompany !=""{
+func (s *Server) FlightDetails(ctx context.Context, company *pb.FlightFilter) (*pb.Flight, error) {
+	if company.AirlineCompany != "" {
 		fmt.Println("Flight details returned for " + company.AirlineCompany)
-		return &pb.Flight{FlightName:"JETX123"},nil
+		return &pb.Flight{FlightName: "JETX123"}, nil
 	}
-	return &pb.Flight{},errors.New("Flight info failed")
+	return &pb.Flight{}, errors.New("Flight info failed")
 }
 
-/*
-func (s *Server) FlightDetails(ctx context.Context,company *pb.FlightFilter) (stream pb.Flight,error) {
-	if company.AirlineCompany !=""{
-		names :=string {"JET1","JET2","JET3"}
+//ListFlights method
+func (s *Server) ListFlights(path *pb.JourneyPath, server pb.Flightinfo_ListFlightsServer) error {
+	if path.GetSource() != "" && path.GetDestination() != "" {
+		names := [...]*booking.Flight{
+			&pb.Flight{FlightName: "JET1"},
+			&pb.Flight{FlightName: "JET2"},
+			&pb.Flight{FlightName: "JET3"}}
 
-
-		for i,j :=range names{
-			if err:=stream.Send(j);
-			err!=nil{return err}
+		for _, i := range names {
+			j := i
+			if err := server.Send(j); err != nil {
+				return err
+			}
 		}
-		fmt.Println("Flight details returned for " + company.AirlineCompany)
+		fmt.Println("Returned List of Flights")
 	}
-	return &pb.Flight{},errors.New("Flight info failed")
+	return errors.New("Flight info failed")
 }
-*/
-
-

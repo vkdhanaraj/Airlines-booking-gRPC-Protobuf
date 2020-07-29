@@ -1,7 +1,6 @@
 syntax = "proto3";
 package booking;
 
-
 message Booking{
     int32 seatNumber = 1;
     string passengerName = 2;
@@ -13,11 +12,15 @@ message Passenger{
 
 message Flight{
     string flightName = 1;
-
 }
 
 message FlightFilter{
     string airlineCompany = 1;
+}
+
+message JourneyPath{
+    string source = 1;
+    string destination = 2; 
 }
 
 service TicketService{
@@ -25,6 +28,6 @@ service TicketService{
 }
 
 service Flightinfo{
-   // rpc FlightDetails(FlightFilter) returns (stream Flight){}
+   rpc ListFlights(JourneyPath) returns (stream Flight){}
    rpc FlightDetails(FlightFilter) returns (Flight){}
 }

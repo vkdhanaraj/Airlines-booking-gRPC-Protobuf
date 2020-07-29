@@ -22,11 +22,10 @@ func main() {
 	s := booking.Server{}
 	grpcServer := grpc.NewServer()
 	pbBooking.RegisterTicketServiceServer(grpcServer, &s)
-	pbBooking.RegisterFlightinfoServer(grpcServer,&s)
-	
+	pbBooking.RegisterFlightinfoServer(grpcServer, &s)
+
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %s", err)
 	}
-
 
 }

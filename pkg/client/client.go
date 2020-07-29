@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"golang.org/x/net/context"
@@ -20,7 +21,11 @@ func main() {
 
 	c := pbBooking.NewTicketServiceClient(conn)
 
-	response, err := c.BookTicket(context.Background(), &pbBooking.Passenger{Name: "Kidiyoor"})
+	var name string
+	fmt.Println("Enter Your Name: ")
+	fmt.Scanln(&name)
+
+	response, err := c.BookTicket(context.Background(), &pbBooking.Passenger{Name: name})
 	if err != nil {
 		log.Fatalf("Error when calling BookTicket: %s", err)
 	}

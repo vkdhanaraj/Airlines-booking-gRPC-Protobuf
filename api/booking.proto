@@ -10,6 +10,21 @@ message Booking{
 message Passenger{
     string name = 1;
 }
+
+message Flight{
+    string flightName = 1;
+
+}
+
+message FlightFilter{
+    string airlineCompany = 1;
+}
+
 service TicketService{
     rpc BookTicket(Passenger) returns (Booking){}
+}
+
+service Flightinfo{
+   // rpc FlightDetails(FlightFilter) returns (stream Flight){}
+   rpc FlightDetails(FlightFilter) returns (Flight){}
 }

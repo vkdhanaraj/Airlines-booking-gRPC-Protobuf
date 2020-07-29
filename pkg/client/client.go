@@ -24,6 +24,14 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error when calling BookTicket: %s", err)
 	}
-	log.Printf("Response from server: %d", response.SeatNumber)
+	log.Printf("Your seat number is : %d", response.SeatNumber)
+
+	fc := pbBooking.NewFlightinfoClient(conn)
+
+	res,er := fc.FlightDetails(context.Background(),&pbBooking.FlightFilter{AirlineCompany:"JET Airways"})
+	if er!=nil {
+		log.Fatalf("Error when calling FlightDetails: %s",er)
+	}
+	log.Printf("JetAirways Flights available: %s",res.FlightName)
 
 }

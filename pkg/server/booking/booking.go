@@ -35,18 +35,17 @@ func (s *Server) FlightDetails(ctx context.Context, company *pb.FlightFilter) (*
 //ListFlights method
 func (s *Server) ListFlights(path *pb.JourneyPath, server pb.Flightinfo_ListFlightsServer) error {
 	if path.GetSource() != "" && path.GetDestination() != "" {
-		names := [...]*booking.Flight{
+		flights := [...]*booking.Flight{
 			&pb.Flight{FlightName: "JET1"},
 			&pb.Flight{FlightName: "JET2"},
 			&pb.Flight{FlightName: "JET3"}}
 
-		for _, i := range names {
-			j := i
+		for _, j := range flights {
 			if err := server.Send(j); err != nil {
 				return err
 			}
 		}
 		fmt.Println("Returned List of Flights")
 	}
-	return errors.New("Flight info failed")
+	return nil
 }

@@ -23,7 +23,7 @@ func main() {
 	//Services Menu (Take input from user)
 	var ch string
 	fmt.Println("Menu")
-	fmt.Println("Enter \n 1: Book Ticket \n 2: Flight Details \n 3: List flights between airports")
+	fmt.Println("Enter \n 1: Book Ticket \n 2: List flights between airports")
 	fmt.Scanln(&ch)
 
 	switch ch {
@@ -39,15 +39,7 @@ func main() {
 		}
 		log.Printf("Your seat number is : %d", response.SeatNumber)
 
-	case "2": //Flight Details
-		c := pbBooking.NewFlightinfoClient(conn)
-
-		res, err := c.FlightDetails(context.Background(), &pbBooking.FlightFilter{AirlineCompany: "JET Airways"})
-		if err != nil {
-			log.Fatalf("Error when calling FlightDetails: %s", err)
-		}
-		log.Printf("JetAirways Flights available: %s", res.FlightName)
-	case "3":
+	case "2": //List Flights
 		var src string
 		var dest string
 		fmt.Println("Enter Source")

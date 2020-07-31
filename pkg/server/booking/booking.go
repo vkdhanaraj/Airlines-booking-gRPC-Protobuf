@@ -23,15 +23,6 @@ func (s *Server) BookTicket(ctx context.Context, passenger *pb.Passenger) (*pb.B
 	return &pb.Booking{}, errors.New("Booking failed")
 }
 
-//FlightDetails method
-func (s *Server) FlightDetails(ctx context.Context, company *pb.FlightFilter) (*pb.Flight, error) {
-	if company.AirlineCompany != "" {
-		fmt.Println("Flight details returned for " + company.AirlineCompany)
-		return &pb.Flight{FlightName: "JETX123"}, nil
-	}
-	return &pb.Flight{}, errors.New("Flight info failed")
-}
-
 //ListFlights method
 func (s *Server) ListFlights(path *pb.JourneyPath, server pb.Flightinfo_ListFlightsServer) error {
 	if path.GetSource() != "" && path.GetDestination() != "" {

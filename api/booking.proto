@@ -1,6 +1,8 @@
 syntax = "proto3";
 package booking;
 
+option go_package = "Airlines-booking-gRPC-Protobuf/genfiles";
+
 message Booking{
     int32 seatNumber = 1;
     string passengerName = 2;
@@ -14,10 +16,6 @@ message Flight{
     string flightName = 1;
 }
 
-message FlightFilter{
-    string airlineCompany = 1;
-}
-
 message JourneyPath{
     string source = 1;
     string destination = 2; 
@@ -29,5 +27,4 @@ service TicketService{
 
 service Flightinfo{
    rpc ListFlights(JourneyPath) returns (stream Flight){}
-   rpc FlightDetails(FlightFilter) returns (Flight){}
 }

@@ -1,0 +1,18 @@
+syntax = "proto3";
+package userInfo;
+
+option go_package = "Airlines-booking-gRPC-Protobuf/genfiles/userInfo";
+
+
+message Map {
+    string key = 1;
+    string value = 2;
+}
+
+message Message {
+    string message = 1;
+}
+
+service Form {
+    rpc UploadFormData(stream Map) returns (Message){}
+}

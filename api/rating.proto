@@ -1,0 +1,21 @@
+syntax = "proto3";
+package rating;
+
+option go_package = "Airlines-booking-gRPC-Protobuf/genfiles/rating";
+
+message RatingRequest {
+    string flightId = 1;
+    int32 rating =2;
+}
+
+message RatingResponse {
+    string flightId = 1;
+    int32 count = 2;
+    double avg_rating = 3;
+}
+
+
+service RatingService {
+    rpc RateFlights(stream RatingRequest) returns (stream RatingResponse) {};
+}
+

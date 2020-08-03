@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"io"
 	"log"
-
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
 	pbBooking "Airlines-booking-gRPC-Protobuf/genfiles/booking"
 	pbUserInfo "Airlines-booking-gRPC-Protobuf/genfiles/userInfo"
+	pbRating "Airlines-booking-gRPC-Protobuf/genfiles/rating"
 )
 
 func main() {
@@ -24,7 +24,7 @@ func main() {
 	//Services Menu (Take input from user)
 	var ch string
 	fmt.Println("Menu")
-	fmt.Println("Enter \n 1: Book Ticket \n 2: List flights between airports \n 4: UserInfo")
+	fmt.Println("Enter \n 1: Book Ticket \n 2: List flights between airports \n 3: Rate your flight \n 4: UserInfo")
 	fmt.Scanln(&ch)
 
 	switch ch {
@@ -67,6 +67,48 @@ func main() {
 			}
 			fmt.Println(res.FlightName)
 		}
+	
+	case "3" : //Rate flights
+		
+		var id string
+		var rate int32
+		var n int
+
+		fmt.Println("No. of flights to rate: ")
+		fmt.Scanln(&n)
+
+		for i:=1;i<=n;i++{
+
+			fmt.Println("Enter your fligtid: ")
+			fmt.Scanln(&id)
+			fmt.Println("Enter rating: ")
+			fmt.Scanln(&rate)
+
+			data := [...]*pbRating.RatingRequest{&pbRating.RatingRequest{FlightId:id,Rating:rate}}
+
+			c:=pbRating.NewRatingServiceClient(conn)
+
+			stream, err := c.RateFlights(context.Background())
+			if err != nil {
+				log.Fatalf("Error when calling RateFlights: %s", err)
+			}
+
+			for _, info := range data {
+				stream.Send(info)
+			}
+
+			res, err := stream.Recv()
+			if err == io.EOF {
+				return
+			}
+			if err != nil {
+				log.Fatal("cannot receive response: ", err)
+			}
+			fmt.Println("Response recieved: \n" + res.Quality) //check
+		}
+
+
+		
 
 	case "4": //UserInfo
 

@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"io"
 	"log"
-
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
-	pbBooking "Airlines-booking-gRPC-Protobuf/genfiles"
+	pbBooking "Airlines-booking-gRPC-Protobuf/genfiles/booking"
+	pbUserInfo "Airlines-booking-gRPC-Protobuf/genfiles/userInfo"
+	pbRating "Airlines-booking-gRPC-Protobuf/genfiles/rating"
 )
 
 func main() {
@@ -23,7 +24,7 @@ func main() {
 	//Services Menu (Take input from user)
 	var ch string
 	fmt.Println("Menu")
-	fmt.Println("Enter \n 1: Book Ticket \n 2: List flights between airports")
+	fmt.Println("Enter \n 1: Book Ticket \n 2: List flights between airports \n 3: Rate your flight \n 4: UserInfo")
 	fmt.Scanln(&ch)
 
 	switch ch {
@@ -33,11 +34,11 @@ func main() {
 		fmt.Scanln(&name)
 
 		c := pbBooking.NewTicketServiceClient(conn)
-		response, err := c.BookTicket(context.Background(), &pbBooking.Passenger{Name: name})
+		res, err := c.BookTicket(context.Background(), &pbBooking.Passenger{Name: name})
 		if err != nil {
 			log.Fatalf("Error when calling BookTicket: %s", err)
 		}
-		log.Printf("Your seat number is : %d", response.SeatNumber)
+		log.Printf("Your seat number is : %d", res.SeatNumber)
 
 	case "2": //List Flights
 		var src string
@@ -66,7 +67,86 @@ func main() {
 			}
 			fmt.Println(res.FlightName)
 		}
+	
+	case "3" : //Rate flights
+		
+		var id string
+		var rate int32
+		var n int
 
+		fmt.Println("No. of flights to rate: ")
+		fmt.Scanln(&n)
+
+		for i:=1;i<=n;i++{
+
+			fmt.Println("Enter your fligtid: ")
+			fmt.Scanln(&id)
+			fmt.Println("Enter rating: ")
+			fmt.Scanln(&rate)
+
+			data := [...]*pbRating.RatingRequest{&pbRating.RatingRequest{FlightId:id,Rating:rate}}
+
+			c:=pbRating.NewRatingServiceClient(conn)
+
+			stream, err := c.RateFlights(context.Background())
+			if err != nil {
+				log.Fatalf("Error when calling RateFlights: %s", err)
+			}
+
+			for _, info := range data {
+				stream.Send(info)
+			}
+
+			res, err := stream.Recv()
+			if err == io.EOF {
+				return
+			}
+			if err != nil {
+				log.Fatal("cannot receive response: ", err)
+			}
+			fmt.Println("Response recieved: \n" + res.Quality) //check
+		}
+
+
+		
+
+	case "4": //UserInfo
+
+		var name string
+		var dob string
+		var country string
+		var email string
+
+		//Get data from user
+		fmt.Println("Enter Name:")
+		fmt.Scanln(&name)
+		fmt.Println("Enter dob:")
+		fmt.Scanln(&dob)
+		fmt.Println("Enter country:")
+		fmt.Scanln(&country)
+		fmt.Println("Enter email:")
+		fmt.Scanln(&email)
+
+		data := [...]*pbUserInfo.Map{&pbUserInfo.Map{Key: "Name", Value: name},
+			&pbUserInfo.Map{Key: "DOB", Value: dob},
+			&pbUserInfo.Map{Key: "Country", Value: country},
+			&pbUserInfo.Map{Key: "Email", Value: email}}
+
+		c := pbUserInfo.NewFormClient(conn)
+		stream, err := c.UploadFormData(context.Background())
+		if err != nil {
+			log.Fatalf("Error when calling UploadFormData: %s", err)
+		}
+
+		for _, info := range data {
+			stream.Send(info)
+		}
+
+		res, err := stream.CloseAndRecv()
+		if err != nil {
+			log.Fatal("cannot receive response: ", err)
+		}
+		fmt.Println("Response recieved: \n" + res.Message)
 	}
 
 }

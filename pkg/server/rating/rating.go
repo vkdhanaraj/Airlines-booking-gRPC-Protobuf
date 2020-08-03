@@ -1,18 +1,27 @@
 package rating
 
 import (
+<<<<<<< HEAD
 	"errors"
 	"fmt"
 	//rating "Airlines-booking-gRPC-Protobuf/genfiles/rating"
 	pb "Airlines-booking-gRPC-Protobuf/genfiles/rating"
 
 	"golang.org/x/net/context"
+=======
+	"io"
+	"fmt"
+	"log"
+	pb "Airlines-booking-gRPC-Protobuf/genfiles/rating"
+
+>>>>>>> 12789278e52d68c3cf67d545dd91f491e6ceca0f
 )
 
 //Server struct
 type Server struct {
 }
 
+<<<<<<< HEAD
 type RatingServiceServer interface {
 	CreateFlight(context.Context, *CreateRateRequest)(*CreateRateResponse,error)
 	RateFlights(RatingService_RateFlightsServer) error
@@ -113,4 +122,39 @@ func(s *FlightServer)RateFlights(stream pb.RatingService_RateFlightsServer) erro
 
 	}
 	return nil
+=======
+
+
+func(s *Server)RateFlights(stream pb.RatingService_RateFlightsServer) error {
+
+	req, err := stream.Recv()
+	if err == io.EOF {
+		fmt.Print("no more data")
+	
+	}
+	if err != nil {
+			log.Fatalf( "cannot receive stream request: %v", err)
+	}
+	fmt.Println("request received from client",req)
+	id:=req.GetFlightId()
+	rate:=req.GetRating()
+	res :=[...]*pb.RatingResponse{&pb.RatingResponse{FlightId: id,Quality : "None"}}
+	
+	if rate<=5{
+			res =[...]*pb.RatingResponse{&pb.RatingResponse{FlightId: id,Quality : "Bad"}}
+	}else if rate>=6 && rate<8{
+		res =[...]*pb.RatingResponse{&pb.RatingResponse{FlightId: id,Quality : "Above Average"}}
+	}else{
+		res =[...]*pb.RatingResponse{&pb.RatingResponse{FlightId: id,Quality : "Good"}}
+	}
+
+	for _, info := range res {
+		err = stream.Send(info)
+		if err != nil {
+			log.Fatalf( "cannot send stream response: %v", err)
+		}		
+	}
+		
+return nil
+>>>>>>> 12789278e52d68c3cf67d545dd91f491e6ceca0f
 }

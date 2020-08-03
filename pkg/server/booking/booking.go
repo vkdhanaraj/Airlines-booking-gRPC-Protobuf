@@ -4,8 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	booking "Airlines-booking-gRPC-Protobuf/genfiles"
-	pb "Airlines-booking-gRPC-Protobuf/genfiles"
+	pb "Airlines-booking-gRPC-Protobuf/genfiles/booking"
 
 	"golang.org/x/net/context"
 )
@@ -26,7 +25,7 @@ func (s *Server) BookTicket(ctx context.Context, passenger *pb.Passenger) (*pb.B
 //ListFlights method
 func (s *Server) ListFlights(path *pb.JourneyPath, server pb.Flightinfo_ListFlightsServer) error {
 	if path.GetSource() != "" && path.GetDestination() != "" {
-		flights := [...]*booking.Flight{
+		flights := [...]*pb.Flight{
 			&pb.Flight{FlightName: "JET1"},
 			&pb.Flight{FlightName: "JET2"},
 			&pb.Flight{FlightName: "JET3"}}

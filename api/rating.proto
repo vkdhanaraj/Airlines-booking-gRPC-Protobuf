@@ -11,8 +11,6 @@ message RatingRequest {
 message RatingResponse {
     string flightId = 1;
     string quality = 2;
-    //int32 count = 2;
-    //double avg_rating = 3;
 }
 
 

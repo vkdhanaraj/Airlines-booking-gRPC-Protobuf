@@ -1,5 +1,3 @@
-# Airlines booking (gRPC,Protobuf)
-
 ## **Objective**
 
 Learn the working of gRPC and Protobuf using Golang.

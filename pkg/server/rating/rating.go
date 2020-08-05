@@ -17,21 +17,24 @@ func (s *Server) RateFlights(stream pb.RatingService_RateFlightsServer) error {
 	req, err := stream.Recv()
 	if err == io.EOF {
 		fmt.Print("no more data")
+		return nil
 	}
 	if err != nil {
 		log.Fatalf("cannot receive stream request: %v", err)
+		return nil
 	}
 	fmt.Println("request received from client", req)
+
 	id := req.GetFlightId()
 	rate := req.GetRating()
-	res := [...]*pb.RatingResponse{&pb.RatingResponse{FlightId: id, Quality: "None"}}
+	res := []*pb.RatingResponse{&pb.RatingResponse{FlightId: id, Quality: "None"}}
 
 	if rate <= 5 {
-		res = [...]*pb.RatingResponse{&pb.RatingResponse{FlightId: id, Quality: "Bad"}}
+		res = []*pb.RatingResponse{&pb.RatingResponse{FlightId: id, Quality: "Bad"}}
 	} else if rate >= 6 && rate < 8 {
-		res = [...]*pb.RatingResponse{&pb.RatingResponse{FlightId: id, Quality: "Above Average"}}
+		res = []*pb.RatingResponse{&pb.RatingResponse{FlightId: id, Quality: "Above Average"}}
 	} else {
-		res = [...]*pb.RatingResponse{&pb.RatingResponse{FlightId: id, Quality: "Good"}}
+		res = []*pb.RatingResponse{&pb.RatingResponse{FlightId: id, Quality: "Good"}}
 	}
 
 	for _, info := range res {
@@ -40,6 +43,5 @@ func (s *Server) RateFlights(stream pb.RatingService_RateFlightsServer) error {
 			log.Fatalf("cannot send stream response: %v", err)
 		}
 	}
-
 	return nil
 }

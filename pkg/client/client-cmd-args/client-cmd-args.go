@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"os"
+	"strconv"
+	"strings"
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -23,30 +26,25 @@ func main() {
 	defer conn.Close()
 
 	//Services Menu (Take input from user)
-	var ch string
-	fmt.Println("Menu")
-	fmt.Println("Enter \n 1: Book Ticket \n 2: List flights between airports \n 3: Rate your flight \n 4: UserInfo")
-	fmt.Scanln(&ch)
+	ch := strings.ToLower(os.Args[1])
 
 	switch ch {
-	case "1": //Book Ticket
+	case "bookticket": //Book Ticket
 		bookTicket(conn)
-	case "2": //List Flights
+	case "listflights": //List Flights
 		listFlights(conn)
-	case "3": //Rate flights
+	case "rateflights": //Rate flights
 		rateFlights(conn)
-	case "4": //UserInfo
-		getUserInfo(conn)
+	case "uploadform": //UserInfo
+		uploadForm(conn)
 	default:
-		fmt.Println("Invalid Input")
+		fmt.Println("Invalid API")
 	}
 
 }
 
 func bookTicket(conn *grpc.ClientConn) {
-	var name string
-	fmt.Println("Enter Your Name: ")
-	fmt.Scanln(&name)
+	name := os.Args[2]
 
 	c := pbBooking.NewTicketServiceClient(conn)
 	res, err := c.BookTicket(context.Background(), &pbBooking.Passenger{Name: name})
@@ -57,13 +55,8 @@ func bookTicket(conn *grpc.ClientConn) {
 }
 
 func listFlights(conn *grpc.ClientConn) {
-	var src string
-	var dest string
-	fmt.Println("Enter Source")
-	fmt.Scanln(&src)
-	fmt.Println("Enter Destination")
-	fmt.Scanln(&dest)
-
+	src := os.Args[2]
+	dest := os.Args[3]
 	c := pbBooking.NewFlightinfoClient(conn)
 
 	path := &pbBooking.JourneyPath{Source: src, Destination: dest}
@@ -72,7 +65,7 @@ func listFlights(conn *grpc.ClientConn) {
 	if err != nil {
 		log.Fatalf("Error when calling ListFlights: %s", err)
 	}
-	log.Printf("Available Flights: ")
+	fmt.Println("Available Flights: ")
 	for {
 		res, err := stream.Recv()
 		if err == io.EOF {
@@ -86,64 +79,42 @@ func listFlights(conn *grpc.ClientConn) {
 }
 
 func rateFlights(conn *grpc.ClientConn) {
-	var id string
-	var rate int32
-	var n int
-
-	fmt.Println("No. of flights to rate: ")
-	fmt.Scanln(&n)
-
 	c := pbRating.NewRatingServiceClient(conn)
+	n, err := strconv.Atoi(os.Args[2])
+	if err != nil {
+		log.Println("Error Parsing n")
+	}
 
 	for i := 1; i <= n; i++ {
-		fmt.Println("Enter your fligtid: ")
-		fmt.Scanln(&id)
-		fmt.Println("Enter rating: ")
-		fmt.Scanln(&rate)
-
-		data := []*pbRating.RatingRequest{&pbRating.RatingRequest{FlightId: id, Rating: rate}}
+		id := os.Args[2*i+1]
+		rate, err := strconv.ParseInt(os.Args[2*(i+1)], 10, 32)
+		data := &pbRating.RatingRequest{FlightId: id, Rating: int32(rate)}
 
 		stream, err := c.RateFlights(context.Background())
 		if err != nil {
 			log.Fatalf("Error when calling RateFlights: %s", err)
 		}
 
-		for _, info := range data {
-			stream.Send(info)
-		}
+		stream.Send(data)
 
 		res, err := stream.Recv()
 		if err == io.EOF {
-			return
+			continue
 		}
 		if err != nil {
 			log.Fatal("cannot receive response: ", err)
+			break
 		}
-		fmt.Println("Response recieved: \n" + res.Quality) //check
+		fmt.Println("Response recieved: \n" + res.Quality)
 	}
-
 }
 
-func getUserInfo(conn *grpc.ClientConn) {
-	var name string
-	var dob string
-	var country string
-	var email string
-
-	//Get data from user
-	fmt.Println("Enter Name:")
-	fmt.Scanln(&name)
-	fmt.Println("Enter dob:")
-	fmt.Scanln(&dob)
-	fmt.Println("Enter country:")
-	fmt.Scanln(&country)
-	fmt.Println("Enter email:")
-	fmt.Scanln(&email)
-
-	data := [...]*pbUserInfo.Map{&pbUserInfo.Map{Key: "Name", Value: name},
-		&pbUserInfo.Map{Key: "DOB", Value: dob},
-		&pbUserInfo.Map{Key: "Country", Value: country},
-		&pbUserInfo.Map{Key: "Email", Value: email}}
+func uploadForm(conn *grpc.ClientConn) {
+	data := [...]*pbUserInfo.Map{
+		&pbUserInfo.Map{Key: "Name", Value: os.Args[2]},
+		&pbUserInfo.Map{Key: "DOB", Value: os.Args[3]},
+		&pbUserInfo.Map{Key: "Country", Value: os.Args[4]},
+		&pbUserInfo.Map{Key: "Email", Value: os.Args[5]}}
 
 	c := pbUserInfo.NewFormClient(conn)
 	stream, err := c.UploadFormData(context.Background())
@@ -162,3 +133,46 @@ func getUserInfo(conn *grpc.ClientConn) {
 	fmt.Println("Response recieved: \n" + res.Message)
 
 }
+
+/* Send all req continuously - recieve all responses continuously
+func rateFlights(conn *grpc.ClientConn) {
+	var id string
+	var rate int32
+	var n int
+
+	fmt.Println("No. of flights to rate: ")
+	fmt.Scanln(&n)
+
+	c := pbRating.NewRatingServiceClient(conn)
+	stream, err := c.RateFlights(context.Background())
+	if err != nil {
+		log.Fatalf("Error when calling RateFlights: %s", err)
+	}
+
+	var data = make([]*pbRating.RatingRequest, n)
+
+	for i := 0; i < n; i++ {
+		fmt.Println("Enter your fligtid: ")
+		fmt.Scanln(&id)
+		fmt.Println("Enter rating: ")
+		fmt.Scanln(&rate)
+		data[i] = &pbRating.RatingRequest{FlightId: id, Rating: rate}
+	}
+	for _, info := range data {
+		stream.Send(info)
+	}
+	stream.Send(&pbRating.RatingRequest{}) // Final request
+
+	for {
+		res, err := stream.Recv()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			log.Fatal("cannot receive response: ", err)
+			break
+		}
+		fmt.Println("Response recieved: \n" + res.Quality)
+	}
+}
+*/
